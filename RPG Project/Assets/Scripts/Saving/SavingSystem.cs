@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using UnityEngine;
 
@@ -15,7 +16,9 @@ namespace RPG.Saving
             {
                 Transform playerTransform = GetPlayerTransform();
                 byte[] buffer = SerializeVector(playerTransform.position);
-                stream.Write(buffer, 0, buffer.Length);
+
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stream, new SerializableVector3(playerTransform.position));
             }
         }
 
@@ -25,10 +28,10 @@ namespace RPG.Saving
             print("Loading from " + GetPathFromSaveFile(saveFile));
             using (FileStream stream = File.Open(path, FileMode.Open))
             {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, buffer.Length);
-                Transform playerTransform = GetPlayerTransform();
-                playerTransform.position = DeserializeVector(buffer);
+                BinaryFormatter formatter = new BinaryFormatter();
+                SerializableVector3 position = (SerializableVector3)formatter.Deserialize(stream);
+                GetPlayerTransform().position = position.ToVector();
+
             }
         }
 
@@ -46,7 +49,7 @@ namespace RPG.Saving
             return vectorBytes;
         }
 
-         private Vector3 DeserializeVector(byte[] buffer)
+        private Vector3 DeserializeVector(byte[] buffer)
         {
             Vector3 result = new Vector3();
             result.x = BitConverter.ToSingle(buffer, 0);
