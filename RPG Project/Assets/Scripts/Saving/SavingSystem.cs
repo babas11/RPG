@@ -65,10 +65,10 @@ namespace RPG.Saving
             Dictionary<string, object> stateDict = state;
             foreach (SaveableEntity saveable in FindObjectsOfType<SaveableEntity>())
             {
-                string id = saveable.GetUniqueIdentifier();
-                if (stateDict.ContainsKey(id))
+                string identifier = saveable.GetUniqueIdentifier();
+                if (stateDict.ContainsKey(identifier))
                 {
-                    saveable.RestoreState(stateDict[id]);
+                    saveable.RestoreState(stateDict[identifier]);
                 }
 
             }

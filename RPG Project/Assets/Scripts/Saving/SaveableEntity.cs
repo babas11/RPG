@@ -1,8 +1,6 @@
-using RPG.Core;
+using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.Build.Content;
 using UnityEngine;
-using UnityEngine.AI;
 
 
 namespace RPG.Saving
@@ -18,18 +16,31 @@ namespace RPG.Saving
 
         public object CaptureState()
         {
-            return new SerializableVector3(transform.position);
+            Dictionary<string, object> state = new Dictionary<string, object>();
+            //return new SerializableVector3(transform.position);
+            foreach(ISaveable saveable in GetComponents<ISaveable>()){
+                state[saveable.GetType().ToString()] = saveable.CaptureState();
+            }
+            return state;
         }
 
         public void RestoreState(object state)
         {
-            SerializableVector3 vector = (SerializableVector3)state;
+
+            Dictionary<string,object> stateDict = (Dictionary<string, object>)state;
+            foreach(ISaveable saveable in GetComponents<ISaveable>()){
+                string typeString = saveable.GetType().ToString();
+                if(stateDict.ContainsKey(typeString)){
+                    saveable.RestoreState(stateDict[typeString]);
+                }
+            }
+/*             SerializableVector3 vector = (SerializableVector3)state;
             print("Restoring state to " + vector.ToVector());
             GetComponent<NavMeshAgent>().enabled = false;
             transform.position = vector.ToVector();
             GetComponent<NavMeshAgent>().enabled = true;
             GetComponent<ActionScheduler>().CancelCurrentAction();
-
+ */
         }
 
 #if UNITY_EDITOR
